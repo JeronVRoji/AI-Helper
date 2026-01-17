@@ -1,0 +1,28 @@
+body {
+  font-family: Arial;
+  background: #0f0f0f;
+  color: white;
+}
+
+.chat {
+  width: 90%;
+  max-width: 500px;
+  margin: auto;
+  margin-top: 50px;
+}
+
+.user {
+  text-align: right;
+  margin: 5px;
+  color: #4fc3f7;
+}
+
+.ai {
+  text-align: left;
+  margin: 5px;
+  color: #a5d6a7;
+}
+
+.thinking {
+  opacity: 0.6;
+}
