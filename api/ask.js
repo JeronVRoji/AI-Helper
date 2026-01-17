@@ -5,20 +5,19 @@ export default async function handler(req, res) {
 
   try {
     const { message } = req.body;
-
     if (!message) {
-      return res.status(400).json({ error: "No message sent" });
+      return res.status(400).json({ error: "No message provided" });
     }
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
-        process.env.GEMINI_API_KEY,
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [
             {
+              role: "user",
               parts: [{ text: message }]
             }
           ]
@@ -26,13 +25,29 @@ export default async function handler(req, res) {
       }
     );
 
-    const data = await response.json();
+    const data = await geminiRes.json();
 
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Gemini gave no reply.";
+    // 🔍 DEBUG (remove later if you want)
+    console.log("RAW GEMINI RESPONSE:", JSON.stringify(data));
+
+    let reply = "";
+
+    if (
+      data.candidates &&
+      data.candidates.length > 0 &&
+      data.candidates[0].content?.parts?.length > 0
+    ) {
+      reply = data.candidates[0].content.parts
+        .map(p => p.text)
+        .join("");
+    } else if (data.promptFeedback) {
+      reply = "⚠️ Gemini blocked or filtered this request.";
+    } else {
+      reply = "⚠️ Gemini returned an empty response.";
+    }
 
     res.status(200).json({ reply });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
